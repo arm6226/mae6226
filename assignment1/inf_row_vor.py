@@ -12,8 +12,8 @@ X,Y = np.meshgrid(x,y)            # generation of the mesh grid
 
 gamma = -5.0                  # strength of the vortex
 a=0.2
-xv=np.linspace(xStart,xEnd,np.abs(xStart-xEnd)/a)
-yv=np.zeros_like(xv)
+xl=np.linspace(xStart,xEnd,np.abs(xStart-xEnd)/a)
+yl=np.zeros_like(xl)
 
 u=gamma/(2*a)*np.sinh(2*pi*Y/a)/(np.cosh(2*pi*Y/a)-np.cos(2*pi*X/a))
 v=gamma/(2*a)*np.sin(2*pi*X/a)/(np.cosh(2*pi*Y/a)-np.cos(2*pi*X/a))
@@ -28,5 +28,5 @@ plt.ylim(yStart,yEnd)
 plt.streamplot(X,Y,u,v,\
          density=2,linewidth=1,arrowsize=1,arrowstyle='->')
 plt.title('Infinite Row of Vortices', fontsize=16)
-plt.scatter(xv,yv,c='#CD2305',s=80,marker='o')
+plt.scatter(xl,yl,c='#CD2305',s=80,marker='o')
 plt.show()
