@@ -38,8 +38,8 @@ for i, xVort in enumerate(xv):
     uVortex=uVortex+uVortex1
     vVortex=vVortex+vVortex1
 # computing the stream-function on the mesh grid
-    psiVortex1 = getStreamFunctionVortex(gamma,xVort,yv,X,Y)
-    psiVortex=psiVortex+psiVortex1
+    psiVortex = psiVortex+getStreamFunctionVortex(gamma,xVort,yv,X,Y)
+#    psiVortex=psiVortex+psiVortex1
 
 yvp=np.zeros_like(xv)
 # plotting
@@ -50,7 +50,7 @@ plt.ylabel('y',fontsize=16)
 plt.xlim(xStart,xEnd)
 plt.ylim(yStart,yEnd)
 plt.streamplot(X,Y,uVortex,vVortex,\
-               density=5.0,linewidth=1,arrowsize=1,arrowstyle='->')
+               density=3.5,linewidth=1,arrowsize=1,arrowstyle='->')
 plt.scatter(xv,yvp,c='#CD2305',s=80,marker='o')
 plt.title('Finite Row of Vortices', fontsize=16)
 plt.show()
