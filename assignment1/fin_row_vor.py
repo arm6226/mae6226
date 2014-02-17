@@ -11,7 +11,6 @@ y = np.linspace(yStart,yEnd,N)    # y 1D-array
 X,Y = np.meshgrid(x,y)            # generation of the mesh grid
 
 gamma = -5.0                  # strength of the vortex
-xVortex,yVortex = 0.0,0.0    # location of the vortex
 
 def getStreamFunctionVortex(strength,xv,yv,X,Y):
     psi = strength/(4*pi)*np.log((X-xv)**2+(Y-yv)**2)
@@ -30,18 +29,15 @@ psiVortex=np.zeros_like(X)
 K=10
 #x coordinate of the vortices
 xv=np.linspace(xStart,xEnd,K)
-yv=0
+yv=np.zeros_like(xv)
 
-# computing the velocity components on the mesh grid
-for i, xVort in enumerate(xv):
-    uVortex1,vVortex1 = getVelocityVortex(gamma,xVort,yv,X,Y)
+# computing the velocity and streamfunctionon the mesh grid
+for xVort,yVort in zip(xv,yv):
+    uVortex1,vVortex1 = getVelocityVortex(gamma,xVort,yVort,X,Y)
     uVortex=uVortex+uVortex1
     vVortex=vVortex+vVortex1
-# computing the stream-function on the mesh grid
-    psiVortex = psiVortex+getStreamFunctionVortex(gamma,xVort,yv,X,Y)
-#    psiVortex=psiVortex+psiVortex1
+    psiVortex = psiVortex+getStreamFunctionVortex(gamma,xVort,yVort,X,Y)
 
-yvp=np.zeros_like(xv)
 # plotting
 size = 10
 plt.figure(figsize=(size,(yEnd-yStart)/(xEnd-xStart)*size))
@@ -51,6 +47,6 @@ plt.xlim(xStart,xEnd)
 plt.ylim(yStart,yEnd)
 plt.streamplot(X,Y,uVortex,vVortex,\
                density=3.5,linewidth=1,arrowsize=1,arrowstyle='->')
-plt.scatter(xv,yvp,c='#CD2305',s=80,marker='o')
+plt.scatter(xv,yv,c='#CD2305',s=80,marker='o')
 plt.title('Finite Row of Vortices', fontsize=16)
 plt.show()

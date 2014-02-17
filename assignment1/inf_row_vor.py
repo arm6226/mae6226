@@ -11,8 +11,8 @@ y = np.linspace(yStart,yEnd,N)    # y 1D-array
 X,Y = np.meshgrid(x,y)            # generation of the mesh grid
 
 gamma = -5.0                  # strength of the vortex
-a=0.2
-xl=np.linspace(xStart,xEnd,np.abs(xStart-xEnd)/a)
+a=0.25
+xl=np.linspace(xStart,xEnd,np.abs(xStart-xEnd)/a)-a/2
 yl=np.zeros_like(xl)
 
 u=gamma/(2*a)*np.sinh(2*pi*Y/a)/(np.cosh(2*pi*Y/a)-np.cos(2*pi*X/a))
