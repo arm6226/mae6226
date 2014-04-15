@@ -2,8 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy import integrate
 from math import *
-plt.close
-('all')
+plt.close('all')
 # read of the geometry from a data file
 coords = np.loadtxt(fname='naca0012.dat')
 xp,yp = coords[:,0],coords[:,1]

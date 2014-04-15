@@ -99,7 +99,7 @@ class Freestream:
 
 # definition of the object freestream
 Uinf = 1.0                               # freestream speed
-alpha = 1.0                              # angle of attack (in degrees)
+alpha = 18.0                              # angle of attack (in degrees)
 freestream = Freestream(Uinf,alpha)      # instantiation of the object freestream
 
 # function to evaluate the integral Iij(zi)
