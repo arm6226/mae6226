@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from math import *
-
+plt.close('all')
 N = 50                            # Number of points in each direction
 xStart,xEnd = -2.0,2.0            # x-direction boundaries
 yStart,yEnd = -1.0,1.0            # y-direction boundaries
@@ -35,8 +35,8 @@ u = newsource.u + sourceImage.u
 v = newsource.v + sourceImage.v
 psi = newsource.psi + sourceImage.psi
 
+
 # Plotting
-#%matplotlib inline
 
 size = 10
 plt.figure(num=0, figsize=(size,(yEnd-yStart)/(xEnd-xStart)*size))
@@ -50,6 +50,7 @@ plt.scatter(newsource.x, newsource.y, c='#CD2305', s=80, marker='o')
 plt.scatter(sourceImage.x, sourceImage.y, c='#CD2305', s=80, marker='D')
 plt.axhline(0.0, color='k', linestyle='--', linewidth=4);
 
+#plt.show();
 class Vortex:
     def __init__(self,strength,x,y):
         self.strength = strength
@@ -76,18 +77,18 @@ vortexImage.velocity(X,Y)
 vortexImage.streamFunction(X,Y)
 
 # Superimposition of the vortex and its image
-u = newvortex.u + vortexImage.u
-v = newvortex.v + vortexImage.v
-psi = newvortex.psi + vortexImage.psi
+u1 = newvortex.u + vortexImage.u
+v1 = newvortex.v + vortexImage.v
+psi1 = newvortex.psi + vortexImage.psi
 
 # Plotting
 size = 10
-plt.figure(num=0, figsize=(size,(yEnd-yStart)/(xEnd-xStart)*size))
+plt.figure(num=1, figsize=(size,(yEnd-yStart)/(xEnd-xStart)*size))
 plt.xlabel('x',fontsize=16)
 plt.ylabel('y',fontsize=16)
 plt.xlim(xStart,xEnd)
 plt.ylim(yStart,yEnd)
-plt.streamplot( X,Y, u,v,\
+plt.streamplot( X,Y, u1,v1,\
                density=2.0, linewidth=1, arrowsize=1, arrowstyle='->')
 plt.scatter( newvortex.x, newvortex.y, c='#CD2305', s=80, marker='o')
 plt.scatter( vortexImage.x, vortexImage.y, c='#CD2305', s=80, marker='D')
@@ -118,18 +119,18 @@ vortexImage2.streamFunction(X,Y)
 
 
 # Superimposition of the vortex pair and its image
-u = vortex1.u + vortex2.u + vortexImage1.u + vortexImage2.u
-v = vortex1.v + vortex2.v + vortexImage1.v + vortexImage2.v
-psi = vortex1.psi + vortex2.psi + vortexImage1.psi + vortexImage2.psi
+u2 = vortex1.u + vortex2.u + vortexImage1.u + vortexImage2.u
+v2 = vortex1.v + vortex2.v + vortexImage1.v + vortexImage2.v
+psi2 = vortex1.psi + vortex2.psi + vortexImage1.psi + vortexImage2.psi
 
 # Plotting
 size = 10
-plt.figure(num=0,figsize=(size,(yEnd-yStart)/(xEnd-xStart)*size))
+plt.figure(num=2,figsize=(size,(yEnd-yStart)/(xEnd-xStart)*size))
 plt.xlabel('x',fontsize=16)
 plt.ylabel('y',fontsize=16)
 plt.xlim(xStart,xEnd)
 plt.ylim(yStart,yEnd)
-plt.streamplot(X,Y,u,v,\
+plt.streamplot(X,Y,u2,v2,\
                density=2.0,linewidth=1,arrowsize=1,arrowstyle='->')
 plt.scatter(vortex1.x,vortex1.y,c='#CD2305',s=80,marker='o')
 plt.scatter(vortex2.x,vortex2.y,c='g',s=80,marker='o')
@@ -172,18 +173,18 @@ doubletImage.velocity(X,Y)
 doubletImage.streamFunction(X,Y)        
 
 # Superimposition of the doublet and its image to the uniform flow
-u = uFreestream + doublet.u + doubletImage.u
-v = vFreestream + doublet.v + doubletImage.v
-psi = psiFreestream + doublet.psi + doubletImage.psi
+u3 = uFreestream + doublet.u + doubletImage.u
+v3 = vFreestream + doublet.v + doubletImage.v
+psi3 = psiFreestream + doublet.psi + doubletImage.psi
 
 # Plotting
 size = 10
-plt.figure(num=0,figsize=(size,(yEnd-yStart)/(xEnd-xStart)*size))
+plt.figure(num=3,figsize=(size,(yEnd-yStart)/(xEnd-xStart)*size))
 plt.xlabel('x',fontsize=16)
 plt.ylabel('y',fontsize=16)
 plt.xlim(xStart,xEnd)
 plt.ylim(yStart,yEnd)
-plt.streamplot(X,Y,u,v,\
+plt.streamplot(X,Y,u3,v3,\
                density=2.0,linewidth=1,arrowsize=1,arrowstyle='->')
 plt.scatter(doublet.x,doublet.y,c='r',s=80,marker='o')
 plt.scatter(doubletImage.x,doubletImage.y,c='r',s=80,marker='x')
