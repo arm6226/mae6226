@@ -235,7 +235,7 @@ def getVelocityField(panel,freestream,gamma,X,Y):
     return u,v
 
 # definition of the mesh grid
-Nx,Ny = 50,50
+Nx,Ny = 150,150
 valX,valY = 1.0,2.0
 xmin,xmax = min([p.xa for p in panel]),max([p.xa for p in panel])
 ymin,ymax = min([p.ya for p in panel]),max([p.ya for p in panel])
@@ -251,7 +251,7 @@ size=12
 plt.figure(figsize=(size,(yEnd-yStart)/(xEnd-xStart)*size))
 plt.xlabel('x',fontsize=16)
 plt.ylabel('y',fontsize=16)
-plt.streamplot(X,Y,u,v,density=1,linewidth=1,arrowsize=1,arrowstyle='->')
+plt.streamplot(X,Y,u,v,density=3,linewidth=1,arrowsize=1,arrowstyle='->')
 plt.fill([p.xa for p in panel],[p.ya for p in panel],'ko-',linewidth=2,zorder=2)
 plt.xlim(xStart,xEnd)
 plt.ylim(yStart,yEnd)
