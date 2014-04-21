@@ -1,0 +1,1 @@
+start /MIN ipython notebook --pylab=inline
