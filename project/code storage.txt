@@ -1,0 +1,59 @@
+############################################################
+############################################################
+# Number elements starting from
+# left end of lid, and assign
+# coordinates
+#
+# elmx(k,1/2) : x coord of start (0) or end (1)
+#                 of element k
+#
+# elmy(k,1/2) : y coord of start (0) or end (1)
+#                 of element k
+####
+#                U
+# ______________--->_______________
+#|              1                 |
+#|                                |
+#|                                |
+#|                                |
+#|                             2  |
+#|4                               |
+#|                                |
+#|                                |
+#|               3                |
+#|________________________________|
+#                 L
+###########################################################
+###########################################################
+
+valX,valY = 0.2,0.2
+xmin,xmax = min([p.xa for p in pn]),max([p.xa for p in pn])
+ymin,ymax = min([p.ya for p in pn]),max([p.ya for p in pn])
+xStart,xEnd = xmin-valX*(xmax-xmin),xmax+valX*(xmax-xmin)
+yStart,yEnd = ymin-valY*(ymax-ymin),ymax+valY*(ymax-ymin)
+size = 10
+plt.figure(figsize=(size,(yEnd-yStart)/(xEnd-xStart)*size))
+
+plt.grid(True)
+plt.xlabel('x',fontsize=16)
+plt.ylabel('y',fontsize=16)
+plt.xlim(xStart,xEnd)
+plt.ylim(yStart,yEnd)
+
+plt.plot(np.append([p.xa for p in pn],pn[0].xa),\
+        np.append([p.ya for p in pn],pn[0].ya),\
+        linestyle='-',linewidth=1,\
+        marker='o',markersize=6,color='#CD2305');
+
+plt.plot([p.xc for p in pn if p.loc=='l'],\
+		[p.yc for p in pn if p.loc=='l'],\
+		'ko',linewidth=5)
+plt.plot([p.xc for p in pn if p.loc=='r'],\
+		[p.yc for p in pn if p.loc=='r'],\
+		'ko',linewidth=5)
+plt.plot([p.xc for p in pn if p.loc=='t'],\
+		[p.yc for p in pn if p.loc=='t'],\
+		'co',linewidth=5)
+plt.plot([p.xc for p in pn if p.loc=='b'],\
+		[p.yc for p in pn if p.loc=='b'],\
+		'ko',linewidth=5)
