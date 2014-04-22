@@ -3,7 +3,7 @@ from scipy import integrate
 from math import *
 import matplotlib.pyplot as plt
 plt.close('all')
-Ni = 16;       # Number of elements per side
+Ni = 8;       # Number of elements per side
 N  = 4*Ni;    # Total number of elements
 L = 1.0;   # square box size
 h = L/Ni;  # element length
@@ -80,7 +80,7 @@ def DLP(pj,pk):
         xh[2]=y-pk.yc
         r=1e-50+sqrt((x-pk.xc)**2+(y-pk.yc)**2)
         T = -4*xh[1]*xh[i]*xh[j]/r**4;
-        return T
+        return -T
     dlpint[1]=integrate.quad(lambda x:func2(x,L,1,2),pj.xa,pj.xb)[0]
     dlpint[2]=integrate.quad(lambda x:func2(x,L,2,2),pj.xa,pj.xb)[0]
     return dlpint
