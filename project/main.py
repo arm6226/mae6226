@@ -49,12 +49,12 @@ for k in range(Ni):
     yo,ye=k*h,(k+1)*h
     pn[k1]=Panel(xo,yo,xe,ye,L)
 #include the geometry plot here
-def I(pj):
+def I(pj,pk):
     def func(x,y,i,j):
         xh=np.zeros((3,1))
-        xh[1]=x-pj.xc
-        xh[2]=y-pj.yc
-        r=1e-50+sqrt((x-pj.xc)**2+(y-pj.yc)**2)
+        xh[1]=x-pk.xc
+        xh[2]=y-pk.yc
+        r=1e-50+sqrt((x-pk.xc)**2+(y-pk.yc)**2)
         fn=0.
         fn=-log(r)*(1-abs(i-j))+xh[i]*xh[j]/r**2
         return fn
@@ -66,11 +66,21 @@ def I(pj):
             elif (pj.loc=='l'):ii[i,j]=integrate.quad(lambda y:func(0.,y,i,j),pj.ya,pj.yb)[0]
             elif (pj.loc=='r'):ii[i,j]=integrate.quad(lambda y:func(L,y,i,j),pj.ya,pj.yb)[0]
     return ii
-#compute integral of greens function
+#compute SLP
 #for present location, center of ik'th panel
+minf=np.zeros((N,N,3,3))
 for ik in range(N):
     for i in range(N):
-        eint=I(pn[ik])
-    for i in [1,2]:
-        for j in [1,2]:
-            minf[ik,k,i,j]=eint[i,j]/(4*pi*mu)
+        eint=I(pn[i],pn[ik])
+        for m in [1,2]:
+            for n in [1,2]:
+                minf[ik,k,m,n]=eint[m,n]/(4*pi*mu)
+
+#define DLP integral
+
+
+
+
+
+#compute DLP
+for k in range(Ni):
