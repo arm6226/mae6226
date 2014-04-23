@@ -3,7 +3,7 @@ from scipy import integrate
 from math import *
 import matplotlib.pyplot as plt
 plt.close('all')
-Ni  =  8;       # Number of elements per side
+Ni  =  16;       # Number of elements per side
 N   =  4*Ni;    # Total number of elements
 L   =  1.0;   # square box size
 h   =  L/Ni;  # element length
@@ -29,6 +29,9 @@ class Panel:
         if(abs(self.yc)<=1.e-8): self.loc='b'
         if(abs(self.xc-self.L)<=1.e-8): self.loc='r'
         if(abs(self.yc-self.L)<=1.e-8): self.loc='t'
+        #cartesian components of traction vector
+        self.fx=0.
+        self.fy=0.
 #lid
 for k in range(Ni):
     xo,xe=(k)*h,(k+1)*h
@@ -86,12 +89,12 @@ plt.plot([p.xc for p in pn if p.loc=='b'],\
 		'ko',linewidth=5)
 
 #compute SLP
-def SLP(pj,pk):
+def SLP(pj,x0,y0):
     def func(x,y,i,j):
         xh=np.zeros((3,1))
-        xh[1]=x-pk.xc
-        xh[2]=y-pk.yc
-        r=1e-50+np.sqrt((x-pk.xc)**2+(y-pk.yc)**2)
+        xh[1]=x-x0
+        xh[2]=y-y0
+        r=1e-50+np.sqrt((x-x0)**2+(y-y0)**2)
         fn=0.
         fn=-log(r)*(1-abs(i-j))+xh[i]*xh[j]/r**2
         return fn
@@ -104,13 +107,13 @@ def SLP(pj,pk):
             elif (pj.loc=='r'):ii[i,j]=integrate.quad(lambda y:func(L,y,i,j),pj.ya,pj.yb)[0]
     return ii
 #compute DLP
-def DLP(pj,pk):
+def DLP(pj,x0,y0):
     dlpint=np.zeros((3,1))
     def func2(x,y,i,j):
         xh=np.zeros((3,1))
-        xh[1]=x-pk.xc
-        xh[2]=y-pk.yc
-        r=1e-50+sqrt((x-pk.xc)**2+(y-pk.yc)**2)
+        xh[1]=x-x0
+        xh[2]=y-y0
+        r=1e-50+sqrt((x-x0)**2+(y-y0)**2)
         T = -4*xh[1]*xh[i]*xh[j]/r**4;
         return -T
     dlpint[1]=integrate.quad(lambda x:func2(x,L,1,2),pj.xa,pj.xb)[0]
@@ -119,7 +122,7 @@ def DLP(pj,pk):
 #for present location, center of ik'th panel
 for ik in range(N):
     for k in range(N):
-        eint=SLP(pn[k],pn[ik]) #calculating SLP
+        eint=SLP(pn[k],pn[ik].xc,pn[ik].yc) #calculating SLP
         for m in [1,2]:
             for n in [1,2]:
                 minf[ik,k,m,n]=eint[m,n]/(4*pi*mu)
@@ -127,7 +130,7 @@ for ik in range(N):
     dlpsum[1]=0.
     dlpsum[2]=0.
     for k in range(Ni):
-        dl=DLP(pn[k],pn[ik])# calculate DLP
+        dl=DLP(pn[k],pn[ik].xc,pn[ik].yc) # calculate DLP
         dlpsum[1]=dlpsum[1]+(1/(4*pi))*U*dl[1]
         dlpsum[2]=dlpsum[2]+(1/(4*pi))*U*dl[2]
     ik2=2*ik
@@ -162,8 +165,88 @@ var=np.linalg.solve(A,b)
 #get the element tractions
 fx=var[::2]
 fy=var[1::2]
-plt.figure()
-plt.plot(fx,'g-')
-plt.plot(fy,'r-')
+#plt.figure()
+#plt.plot(fx,'g-')
+#plt.plot(fy,'r-')
+
+#compute velocity along a line xp=const
+#Nu=16
+#xp=0.75*L*np.ones((Nu,1))
+#yp=np.linspace(0,0.95*L,Nu)
+#uxv=np.zeros((Nu,1));
+#uyv=np.zeros((Nu,1));
+
+#for im in range(Nu):
+#    ux=0.
+#    uy=0.
+#    for k in range(N):
+#        eint=SLP(pn[k],xp[im],yp[im])
+#        ux = ux - (1/(4*pi*mu))*(eint[1,1]*fx[k] + eint[2,1]*fy[k]);
+#        uy = uy - (1/(4*pi*mu))*(eint[1,2]*fx[k] + eint[2,2]*fy[k]);
+#    dlpsum[1]=0.
+#    dlpsum[2]=0.
+#    for k in range(Ni):
+#        dl=DLP(pn[k],xp[im],yp[im])
+#        dlpsum[1]=dlpsum[1]+(1/(4*pi))*U*dl[1]
+#        dlpsum[2]=dlpsum[2]+(1/(4*pi))*U*dl[2]
+#    ux = ux + dlpsum[1]
+#    uy = uy + dlpsum[2]
+#    uxv[im]=ux
+#    uyv[im]=uy
+#plt.figure()
+#plt.plot(yp,uxv,'bo-')
+#plt.plot(yp,uyv,'ro-')
+#plt.legend(['Ux','Uy'],'best',prop={'size':14})
+
+#get the
+def VelocityField(p,X,Y,fx,fy):
+    Nx,Ny=X.shape
+    N=p.size
+    u,v = np.empty((Nx,Ny),dtype=float),np.empty((Nx,Ny),dtype=float)
+    for i in range(Nx):
+        for j in range(Ny):
+            ux=0.
+            uy=0.
+            for k in range(N):
+                eint=SLP(pn[k],X[i,j],Y[i,j])
+                ux = ux - (1/(4*pi*mu))*(eint[1,1]*fx[k] + eint[2,1]*fy[k]);
+                uy = uy - (1/(4*pi*mu))*(eint[1,2]*fx[k] + eint[2,2]*fy[k]);
+            dlpsum[1]=0.
+            dlpsum[2]=0.
+            for k in range(N/4):
+                dl=DLP(pn[k],X[i,j],X[i,j])
+                dlpsum[1]=dlpsum[1]+(1/(4*pi))*U*dl[1]
+                dlpsum[2]=dlpsum[2]+(1/(4*pi))*U*dl[2]
+            ux = ux + dlpsum[1]
+            uy = uy + dlpsum[2]
+            u[i,j]=ux
+            v[i,j]=uy
+    return u,v
+
+#definition of meshgrid
+Nx,Ny=24,24
+X,Y=np.meshgrid(np.linspace(0.01*L,0.99*L,Nx),np.linspace(0.01*L,0.99*L,Ny))
+
+u,v=VelocityField(pn,X,Y,fx,fy)
+
+valX,valY = 0.2,0.2
+xmin,xmax = min([p.xa for p in pn]),max([p.xa for p in pn])
+ymin,ymax = min([p.ya for p in pn]),max([p.ya for p in pn])
+xStart,xEnd = xmin-valX*(xmax-xmin),xmax+valX*(xmax-xmin)
+yStart,yEnd = ymin-valY*(ymax-ymin),ymax+valY*(ymax-ymin)
+size=12
+plt.figure(figsize=(size,(yEnd-yStart)/(xEnd-xStart)*size))
+plt.xlabel('x',fontsize=16)
+plt.ylabel('y',fontsize=16)
+#plt.streamplot(X,Y,u,v,density=1,linewidth=1,arrowsize=1,arrowstyle='->')
+plt.quiver(u,v)
+plt.plot(np.append([p.xa for p in pn],pn[0].xa),\
+        np.append([p.ya for p in pn],pn[0].ya),\
+        linestyle='-',linewidth=1,\
+        marker='o',markersize=6,color='#CD2305');
+plt.xlim(xStart,xEnd)
+plt.ylim(yStart,yEnd)
+plt.title('Contour of velocity field');
+
 
 plt.show()
