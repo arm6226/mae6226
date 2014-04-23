@@ -3,12 +3,12 @@ from scipy import integrate
 from math import *
 import matplotlib.pyplot as plt
 plt.close('all')
-Ni  =  4;       # Number of elements per side
+Ni  =  16;       # Number of elements per side
 N   =  4*Ni;    # Total number of elements
 L   =  1.0;   # square box size
 h   =  L/Ni;  # element length
-mu  =  1.0;  # Fluid viscosity
-U   =  2.0;  # Lid velocity
+mu  =  15.0;  # Fluid viscosity
+U   =  1.0;  # Lid velocity
 #declarations
 
 pn = np.empty(N,dtype=object)
@@ -116,7 +116,7 @@ def DLP(pj,x0,y0):
         xh[2]=y-y0
         r=1e-50+sqrt((x-x0)**2+(y-y0)**2)
         T = -4*xh[1]*xh[i]*xh[j]/r**4;
-        return -T
+        return -T #normal pointing in -y dir
     dlpint[1]=integrate.quad(lambda x:func2(x,L,1,2),pj.xa,pj.xb)[0]
     dlpint[2]=integrate.quad(lambda x:func2(x,L,2,2),pj.xa,pj.xb)[0]
     return dlpint
@@ -163,12 +163,15 @@ b= dd - 0.5*U*(np.concatenate([c1,c2]))
 #solve the system
 var=np.linalg.solve(A,b)
 
-#get the element tractions
+#get the element tractions and put them in the panels
 fx=var[::2]
 fy=var[1::2]
+for i in range(N):
+    pn[i].fx=fx[i]
+    pn[i].fy=fy[i]
 
 #function to calculate velocity over a meshgrid
-def VelocityField(p,X,Y,fx,fy):
+def VelocityField(p,X,Y):
     Nx,Ny=X.shape
     N=p.size
     u,v = np.empty((Nx,Ny),dtype=float),np.empty((Nx,Ny),dtype=float)
@@ -177,13 +180,13 @@ def VelocityField(p,X,Y,fx,fy):
             ux=0.
             uy=0.
             for k in range(N):
-                eint=SLP(pn[k],X[i,j],Y[i,j])
-                ux = ux - (1/(4*pi*mu))*(eint[1,1]*fx[k] + eint[2,1]*fy[k]);
-                uy = uy - (1/(4*pi*mu))*(eint[1,2]*fx[k] + eint[2,2]*fy[k]);
+                eint=SLP(p[k],X[i,j],Y[i,j])
+                ux = ux - (1/(4*pi*mu))*(eint[1,1]*p[k].fx + eint[2,1]*p[k].fy);
+                uy = uy - (1/(4*pi*mu))*(eint[1,2]*p[k].fx + eint[2,2]*p[k].fy);
             dlpsum[1]=0.
             dlpsum[2]=0.
             for k in range(N/4):
-                dl=DLP(pn[k],X[i,j],Y[i,j])
+                dl=DLP(p[k],X[i,j],Y[i,j])
                 dlpsum[1]=dlpsum[1]+(1/(4*pi))*U*dl[1]
                 dlpsum[2]=dlpsum[2]+(1/(4*pi))*U*dl[2]
             ux = ux + dlpsum[1]
@@ -196,7 +199,7 @@ def VelocityField(p,X,Y,fx,fy):
 Nx,Ny=16,16
 X,Y=np.meshgrid(np.linspace(0.01*L,0.99*L,Nx),np.linspace(0.01*L,0.99*L,Ny))
 
-u,v=VelocityField(pn,X,Y,fx,fy)
+u,v=VelocityField(pn,X,Y)
 
 valX,valY = 0.2,0.2
 xmin,xmax = min([p.xa for p in pn]),max([p.xa for p in pn])
@@ -207,7 +210,7 @@ size=12
 plt.figure(figsize=(size,(yEnd-yStart)/(xEnd-xStart)*size))
 plt.xlabel('x',fontsize=16)
 plt.ylabel('y',fontsize=16)
-plt.streamplot(X,Y,u,v,density=1,linewidth=1,arrowsize=1,arrowstyle='->')
+plt.streamplot(X,Y,u,v,density=5,linewidth=1,arrowsize=1,arrowstyle='->')
 #plt.quiver(X,Y,u,v)
 plt.plot(np.append([p.xa for p in pn],pn[0].xa),\
         np.append([p.ya for p in pn],pn[0].ya),\

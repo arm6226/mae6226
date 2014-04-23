@@ -148,7 +148,6 @@ for ik in range(N):
         A[ik2,k2+1]   = minf[ik,k,1,2];
         A[ik2+1,k2]   = minf[ik,k,2,1];
         A[ik2+1,k2+1] = minf[ik,k,2,2];
-
 #RHS---b
 for ik in range(Ni):
     ik2=2*ik
@@ -161,11 +160,11 @@ for ik in range(3*Ni):
 b= dd - 0.5*U*(np.concatenate([c1,c2]))
 
 #solve the system
-var=np.linalg.solve(A,b)
+f=np.linalg.solve(A,b)
 
 #get the element tractions
-fx=var[::2]
-fy=var[1::2]
+fx=f[::2]
+fy=f[1::2]
 
 #function to calculate velocity over a meshgrid
 def VelocityField(p,X,Y,fx,fy):
@@ -195,7 +194,6 @@ def VelocityField(p,X,Y,fx,fy):
 #definition of meshgrid
 Nx,Ny=16,16
 X,Y=np.meshgrid(np.linspace(0.01*L,0.99*L,Nx),np.linspace(0.01*L,0.99*L,Ny))
-
 u,v=VelocityField(pn,X,Y,fx,fy)
 
 valX,valY = 0.2,0.2
