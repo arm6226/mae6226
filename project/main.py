@@ -3,12 +3,12 @@ from scipy import integrate
 from math import *
 import matplotlib.pyplot as plt
 plt.close('all')
-Ni = 8;       # Number of elements per side
-N  = 4*Ni;    # Total number of elements
-L = 1.0;   # square box size
-h = L/Ni;  # element length
-mu = 1.0;  # Fluid viscosity
-U  = 2.0;  # Lid velocity
+Ni  =  8;       # Number of elements per side
+N   =  4*Ni;    # Total number of elements
+L   =  1.0;   # square box size
+h   =  L/Ni;  # element length
+mu  =  1.0;  # Fluid viscosity
+U   =  2.0;  # Lid velocity
 #declarations
 
 pn = np.empty(N,dtype=object)
@@ -25,10 +25,10 @@ class Panel:
         self.xa,self.ya = xa,ya                     # 1st end-point
         self.xb,self.yb = xb,yb                     # 2nd end-point
         self.xc,self.yc = (xa+xb)/2,(ya+yb)/2       # control point
-        if(abs(self.xc)<=1.e-5): self.loc='l'
-        if(abs(self.yc)<=1.e-5): self.loc='b'
-        if(abs(self.xc-self.L)<=1.e-5): self.loc='r'
-        if(abs(self.yc-self.L)<=1.e-5): self.loc='t'
+        if(abs(self.xc)<=1.e-8): self.loc='l'
+        if(abs(self.yc)<=1.e-8): self.loc='b'
+        if(abs(self.xc-self.L)<=1.e-8): self.loc='r'
+        if(abs(self.yc-self.L)<=1.e-8): self.loc='t'
 #lid
 for k in range(Ni):
     xo,xe=(k)*h,(k+1)*h
@@ -53,13 +53,45 @@ for k in range(Ni):
     yo,ye=k*h,(k+1)*h
     pn[k1]=Panel(xo,yo,xe,ye,L)
 #include the geometry plot here
+valX,valY = 0.2,0.2
+xmin,xmax = min([p.xa for p in pn]),max([p.xa for p in pn])
+ymin,ymax = min([p.ya for p in pn]),max([p.ya for p in pn])
+xStart,xEnd = xmin-valX*(xmax-xmin),xmax+valX*(xmax-xmin)
+yStart,yEnd = ymin-valY*(ymax-ymin),ymax+valY*(ymax-ymin)
+size = 10
+plt.figure(figsize=(size,(yEnd-yStart)/(xEnd-xStart)*size))
+
+plt.grid(True)
+plt.xlabel('x',fontsize=16)
+plt.ylabel('y',fontsize=16)
+plt.xlim(xStart,xEnd)
+plt.ylim(yStart,yEnd)
+
+plt.plot(np.append([p.xa for p in pn],pn[0].xa),\
+        np.append([p.ya for p in pn],pn[0].ya),\
+        linestyle='-',linewidth=1,\
+        marker='o',markersize=6,color='#CD2305');
+
+plt.plot([p.xc for p in pn if p.loc=='l'],\
+		[p.yc for p in pn if p.loc=='l'],\
+		'ko',linewidth=5)
+plt.plot([p.xc for p in pn if p.loc=='r'],\
+		[p.yc for p in pn if p.loc=='r'],\
+		'ko',linewidth=5)
+plt.plot([p.xc for p in pn if p.loc=='t'],\
+		[p.yc for p in pn if p.loc=='t'],\
+		'co',linewidth=5)
+plt.plot([p.xc for p in pn if p.loc=='b'],\
+		[p.yc for p in pn if p.loc=='b'],\
+		'ko',linewidth=5)
+
 #compute SLP
-def I(pj,pk):
+def SLP(pj,pk):
     def func(x,y,i,j):
         xh=np.zeros((3,1))
         xh[1]=x-pk.xc
         xh[2]=y-pk.yc
-        r=1e-50+sqrt((x-pk.xc)**2+(y-pk.yc)**2)
+        r=1e-50+np.sqrt((x-pk.xc)**2+(y-pk.yc)**2)
         fn=0.
         fn=-log(r)*(1-abs(i-j))+xh[i]*xh[j]/r**2
         return fn
@@ -87,7 +119,7 @@ def DLP(pj,pk):
 #for present location, center of ik'th panel
 for ik in range(N):
     for k in range(N):
-        eint=I(pn[k],pn[ik]) #calculating SLP
+        eint=SLP(pn[k],pn[ik]) #calculating SLP
         for m in [1,2]:
             for n in [1,2]:
                 minf[ik,k,m,n]=eint[m,n]/(4*pi*mu)
@@ -119,7 +151,7 @@ for ik in range(Ni):
     c1[ik2+1]=0
 for ik in range(3*Ni):
     ik2=2*ik
-    c2[ik2]=1
+    c2[ik2]=0
     c2[ik2+1]=0
 
 b= dd - 0.5*U*(np.concatenate([c1,c2]))
@@ -130,7 +162,7 @@ var=np.linalg.solve(A,b)
 #get the element tractions
 fx=var[::2]
 fy=var[1::2]
-
+plt.figure()
 plt.plot(fx,'g-')
 plt.plot(fy,'r-')
 
