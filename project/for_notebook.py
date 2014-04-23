@@ -2,15 +2,16 @@ import numpy as np
 from scipy import integrate
 from math import *
 import matplotlib.pyplot as plt
-plt.close('all')
+
+
 Ni  =  4;       # Number of elements per side
 N   =  4*Ni;    # Total number of elements
 L   =  1.0;   # square box size
 h   =  L/Ni;  # element length
 mu  =  1.0;  # Fluid viscosity
 U   =  2.0;  # Lid velocity
-#declarations
 
+#declarations
 pn = np.empty(N,dtype=object)
 minf=np.zeros((N,N,3,3))
 dlpsum=np.zeros((3,1))
@@ -157,7 +158,6 @@ for ik in range(3*Ni):
     ik2=2*ik
     c2[ik2]=0
     c2[ik2+1]=0
-
 b= dd - 0.5*U*(np.concatenate([c1,c2]))
 
 #solve the system

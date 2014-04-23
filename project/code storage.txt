@@ -57,3 +57,38 @@ plt.plot([p.xc for p in pn if p.loc=='t'],\
 plt.plot([p.xc for p in pn if p.loc=='b'],\
 		[p.yc for p in pn if p.loc=='b'],\
 		'ko',linewidth=5)
+            
+            
+            
+#plt.figure()
+#plt.plot(fx,'g-')
+#plt.plot(fy,'r-')
+
+#compute velocity along a line xp=const
+#Nu=16
+#xp=0.75*L*np.ones((Nu,1))
+#yp=np.linspace(0,0.95*L,Nu)
+#uxv=np.zeros((Nu,1));
+#uyv=np.zeros((Nu,1));
+
+#for im in range(Nu):
+#    ux=0.
+#    uy=0.
+#    for k in range(N):
+#        eint=SLP(pn[k],xp[im],yp[im])
+#        ux = ux - (1/(4*pi*mu))*(eint[1,1]*fx[k] + eint[2,1]*fy[k]);
+#        uy = uy - (1/(4*pi*mu))*(eint[1,2]*fx[k] + eint[2,2]*fy[k]);
+#    dlpsum[1]=0.
+#    dlpsum[2]=0.
+#    for k in range(Ni):
+#        dl=DLP(pn[k],xp[im],yp[im])
+#        dlpsum[1]=dlpsum[1]+(1/(4*pi))*U*dl[1]
+#        dlpsum[2]=dlpsum[2]+(1/(4*pi))*U*dl[2]
+#    ux = ux + dlpsum[1]
+#    uy = uy + dlpsum[2]
+#    uxv[im]=ux
+#    uyv[im]=uy
+#plt.figure()
+#plt.plot(yp,uxv,'bo-')
+#plt.plot(yp,uyv,'ro-')
+#plt.legend(['Ux','Uy'],'best',prop={'size':14})
