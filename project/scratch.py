@@ -3,15 +3,12 @@ from scipy import integrate
 from math import *
 import matplotlib.pyplot as plt
 plt.close('all')
-Ni  =  32;       # Number of elements per side
+Ni  =  4;       # Number of elements per side
 N   =  4*Ni;    # Total number of elements
-Lx  =  1.0;   # square box size
-Ly  =  1.0;
-hx  =  Lx/Ni;  # element length
-hy  =  Ly/Ni;
+Lx,Ly  =  [1.0,1.0];   # square box size
+hx,hy =  [Lx/Ni,Ly/Ni];  # element length
 mu  =  1.0;  # Fluid viscosity
 U   =  2.0;  # Lid velocity
-#declarations
 
 pn = np.empty(N,dtype=object)
 minf=np.zeros((N,N,3,3))
@@ -21,98 +18,87 @@ A=np.zeros((2*N,2*N))
 c1=np.zeros((2*Ni,1))
 c2=np.zeros((6*Ni,1))
 
-#define the class panel
 class Panel:
-    def __init__(self,xa,ya,xb,yb,Lx,Ly):
-        self.Lx,self.Ly = Lx,Ly
+    def __init__(self,xa,ya,xb,yb):
         self.xa,self.ya = xa,ya                     # 1st end-point
         self.xb,self.yb = xb,yb                     # 2nd end-point
         self.xc,self.yc = (xa+xb)/2,(ya+yb)/2       # control point
+        self.length = sqrt((xb-xa)**2+(yb-ya)**2)
         # orientation of the panel
-        #location of the element,
-        if(abs(self.xc)<=1.e-8): self.loc='l'
-        if(abs(self.yc)<=1.e-8): self.loc='b'
-        if(abs(self.xc-self.Lx)<=1.e-8): self.loc='r'
-        if(abs(self.yc-self.Ly)<=1.e-8): self.loc='t'
+        if (xb-xa>=0.):
+            self.beta=acos((ya-yb)/self.length)
+        elif (xb-xa<0.):
+            self.beta = pi+acos((ya-yb)/self.length)
+
         #cartesian components of traction vector
         self.fx=0.
         self.fy=0.
-#geometry
+#define the geometry
 for i in range(N):
     if(i<Ni):
-        pn[i]=Panel(i*hx,Ly,(i+1)*hx,Ly,Lx,Ly)
+        pn[i]=Panel(i*hx,Ly,(i+1)*hx,Ly)
     elif(Ni<=i<2*Ni):
         ii=i-Ni
-        pn[i]=Panel(Lx,(Ly-ii*hy),Lx,(Ly-(ii+1)*hy),Lx,Ly)
+        pn[i]=Panel(Lx,(Ly-ii*hy),Lx,(Ly-(ii+1)*hy))
     elif (2*Ni<=i<3*Ni):
         ii=i-2*Ni
-        pn[i]=Panel(Lx-ii*hx,0.,Lx-(ii+1)*hx,0.,Lx,Ly)
+        pn[i]=Panel(Lx-ii*hx,0.,Lx-(ii+1)*hx,0.)
     elif (3*Ni<=i<4*Ni):
         ii=i-3*Ni
-        pn[i]=Panel(0.,(ii*hy),0.,((ii+1)*hy),Lx,Ly)
-
-##include the geometry plot here
-#valX,valY = 0.2,0.2
-#xmin,xmax = min([p.xa for p in pn]),max([p.xa for p in pn])
-#ymin,ymax = min([p.ya for p in pn]),max([p.ya for p in pn])
-#xStart,xEnd = xmin-valX*(xmax-xmin),xmax+valX*(xmax-xmin)
-#yStart,yEnd = ymin-valY*(ymax-ymin),ymax+valY*(ymax-ymin)
-#size = 10
-#plt.figure(figsize=(size,(yEnd-yStart)/(xEnd-xStart)*size))
-#
-#plt.grid(True)
-#plt.xlabel('x',fontsize=16)
-#plt.ylabel('y',fontsize=16)
-#plt.xlim(xStart,xEnd)
-#plt.ylim(yStart,yEnd)
-#
-#plt.plot(np.append([p.xa for p in pn],pn[0].xa),\
-#        np.append([p.ya for p in pn],pn[0].ya),\
-#        linestyle='-',linewidth=1,\
-#        marker='o',markersize=6,color='#CD2305');
-#
-#plt.plot([p.xc for p in pn],[p.yc for p in pn],'ko',linewidth=5)
-#
-#plt.axis('equal')
+        pn[i]=Panel(0.,(ii*hy),0.,((ii+1)*hy))
+    print(pn[i].beta)
+#display the geometry
+valX,valY = 0.1*Lx,0.1*Ly
+xmin,xmax = min([p.xa for p in pn]),max([p.xa for p in pn])
+ymin,ymax = min([p.ya for p in pn]),max([p.ya for p in pn])
+xStart,xEnd = xmin-valX*(xmax-xmin),xmax+valX*(xmax-xmin)
+yStart,yEnd = ymin-valY*(ymax-ymin),ymax+valY*(ymax-ymin)
+size = 10
+plt.figure(figsize=(size,(yEnd-yStart)/(xEnd-xStart)*size))
+plt.grid(True)
+plt.xlabel('x',fontsize=16);plt.ylabel('y',fontsize=16)
+plt.xlim(xStart,xEnd);plt.ylim(yStart,yEnd)
+plt.plot(np.append([p.xa for p in pn],pn[0].xa),\
+        np.append([p.ya for p in pn],pn[0].ya),\
+        'ko');
+plt.plot([p.xc for p in pn ],[p.yc for p in pn],'co',linewidth=5)
 #compute SLP
 def SLP(pj,x0,y0):
-    def func(x,y,i,j):
+    def func(s,i,j):
         xh=np.zeros((3,1))
+        x=pj.xa+sin(pj.beta)*s
+        y=pj.ya-cos(pj.beta)*s
         xh[1]=x-x0
         xh[2]=y-y0
         r=1e-50+np.sqrt((x-x0)**2+(y-y0)**2)
-        fn=0.
         fn=-log(r)*(1-abs(i-j))+xh[i]*xh[j]/r**2
         return fn
     ii=np.zeros((3,3))
     for i in [1,2]:
         for j in [1,2]:
-            if (pj.loc=='t'):ii[i,j]=integrate.quad(lambda x:func(x,Ly,i,j),pj.xa,pj.xb)[0]
-            elif (pj.loc=='b'):ii[i,j]=integrate.quad(lambda x:func(x,0.,i,j),pj.xa,pj.xb)[0]
-            elif (pj.loc=='l'):ii[i,j]=integrate.quad(lambda y:func(0.,y,i,j),pj.ya,pj.yb)[0]
-            elif (pj.loc=='r'):ii[i,j]=integrate.quad(lambda y:func(Lx,y,i,j),pj.ya,pj.yb)[0]
+            ii[i,j]=integrate.quad(lambda s:func(s,i,j),0.,pj.length)[0]
     return ii
-#compute DLP
 def DLP(pj,x0,y0):
     dlpint=np.zeros((3,1))
-    def func2(x,y,i,j):
+    def func2(s,i,j):
         xh=np.zeros((3,1))
+        x=pj.xa+sin(pj.beta)*s
+        y=pj.ya-cos(pj.beta)*s
         xh[1]=x-x0
         xh[2]=y-y0
         r=1e-50+sqrt((x-x0)**2+(y-y0)**2)
         T = -4*xh[1]*xh[i]*xh[j]/r**4;
         return -T #normal pointing in -y dir
-    dlpint[1]=integrate.quad(lambda x:func2(x,Ly,1,2),pj.xa,pj.xb)[0]
-    dlpint[2]=integrate.quad(lambda x:func2(x,Ly,2,2),pj.xa,pj.xb)[0]
+    dlpint[1]=integrate.quad(lambda s:func2(s,1,2),0.,pj.length)[0]
+    dlpint[2]=integrate.quad(lambda s:func2(s,2,2),0.,pj.length)[0]
     return dlpint
-#for present location, center of ik'th panel
 for ik in range(N):
     for k in range(N):
         eint=SLP(pn[k],pn[ik].xc,pn[ik].yc) #calculating SLP
         for m in [1,2]:
             for n in [1,2]:
                 minf[ik,k,m,n]=eint[m,n]/(4*pi*mu)
-#compute DLP
+
     dlpsum[1]=0.
     dlpsum[2]=0.
     for k in range(Ni):
@@ -123,7 +109,6 @@ for ik in range(N):
     dd[ik2]=dlpsum[1]
     dd[ik2+1]=dlpsum[2]
 
-#coeff matrix ----A
 for ik in range(N):
     ik2=2*ik
     for k in range(N):
@@ -132,7 +117,6 @@ for ik in range(N):
         A[ik2,k2+1]   = minf[ik,k,1,2];
         A[ik2+1,k2]   = minf[ik,k,2,1];
         A[ik2+1,k2+1] = minf[ik,k,2,2];
-
 #RHS---b
 for ik in range(Ni):
     ik2=2*ik
@@ -179,30 +163,19 @@ def VelocityField(p,X,Y):
             u[i,j]=ux
             v[i,j]=uy
     return u,v
-
 #definition of meshgrid
-Nx,Ny=20,20
-X,Y=np.meshgrid(np.linspace(0.,0.01*Lx,Nx),np.linspace(0.,0.01*Ly,Ny))
-
+Nx,Ny=16,16
+X,Y=np.meshgrid(np.linspace(0.01*Lx,0.99*Lx,Nx),np.linspace(0.01*Ly,0.99*Ly,Ny))
 u,v=VelocityField(pn,X,Y)
-
-valX,valY = 0.1,0.1
-xmin,xmax = min([p.xa for p in pn]),max([p.xa for p in pn])
-ymin,ymax = min([p.ya for p in pn]),max([p.ya for p in pn])
-xStart,xEnd = xmin-valX*(xmax-xmin),xmax+valX*(xmax-xmin)
-yStart,yEnd = ymin-valY*(ymax-ymin),ymax+valY*(ymax-ymin)
 size=12
 plt.figure(figsize=(size,(yEnd-yStart)/(xEnd-xStart)*size))
-plt.xlabel('x',fontsize=16)
-plt.ylabel('y',fontsize=16)
-plt.streamplot(X,Y,u,v,density=10,linewidth=1,arrowsize=1,arrowstyle='->')
+plt.streamplot(X,Y,u,v,density=5,linewidth=1,arrowsize=1,arrowstyle='->')
 #plt.quiver(X,Y,u,v)
-#plt.plot(np.append([p.xa for p in pn],pn[0].xa),\
-#        np.append([p.ya for p in pn],pn[0].ya),\
-#        linestyle='-',linewidth=1,\
-#        marker='o',markersize=6,color='#CD2305');
-plt.xlim(0.,0.011)
-plt.ylim(0.,0.011)
-plt.axis('equal')
+plt.plot(np.append([p.xa for p in pn],pn[0].xa),\
+        np.append([p.ya for p in pn],pn[0].ya),\
+        linestyle='-',linewidth=1,\
+        marker='o',markersize=6,color='#CD2305');
+plt.xlim(xStart,xEnd)
+plt.ylim(yStart,yEnd)
 plt.title('Contour of velocity field');
 plt.show()
