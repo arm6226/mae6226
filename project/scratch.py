@@ -3,8 +3,8 @@ from scipy import integrate
 from math import *
 import matplotlib.pyplot as plt
 plt.close('all')
-Ni  =  8;       # Number of elements per side
-N   =  4*Ni;    # Total number of elements
+Ni  =  32;       # Number of elements per side
+N   =  5*Ni;    # Total number of elements
 Lx,Ly  =  [1.0,1.0];   # square box size
 hx,hy =  [Lx/Ni,Ly/Ni];  # element length
 mu  =  1.0;  # Fluid viscosity
@@ -15,7 +15,7 @@ dlpsum=np.zeros((3,1))
 dd=np.zeros((2*N,1))
 A=np.zeros((2*N,2*N))
 c1=np.zeros((2*Ni,1))
-c2=np.zeros((6*Ni,1))
+c2=np.zeros((8*Ni,1))
 class Panel:
     def __init__(self,xa,ya,xb,yb):
         self.xa,self.ya = xa,ya                     # 1st end-point
@@ -43,6 +43,13 @@ for i in range(N):
     elif (3*Ni<=i<4*Ni):
         ii=i-3*Ni
         pn[i]=Panel(0.,(ii*hy),0.,((ii+1)*hy))
+    elif (4*Ni<=i<5*Ni):
+        ii=i-3*Ni
+        xa=0.5 +0.2*cos(2*pi*float(Ni-ii)/Ni)
+        ya=0.5 +0.2*sin(2*pi*float(Ni-ii)/Ni)
+        xb=0.5 +0.2*cos(2*pi*float(Ni-ii-1)/Ni)
+        yb=0.5 +0.2*sin(2*pi*float(Ni-ii-1)/Ni)
+        pn[i]=Panel(xa,ya,xb,yb)
 #display the geometry
 valX,valY = 0.1*Lx,0.1*Ly
 xmin,xmax = min([p.xa for p in pn]),max([p.xa for p in pn])
@@ -56,7 +63,7 @@ plt.xlabel('x',fontsize=16);plt.ylabel('y',fontsize=16)
 plt.xlim(xStart,xEnd);plt.ylim(yStart,yEnd)
 plt.plot(np.append([p.xa for p in pn],pn[0].xa),\
         np.append([p.ya for p in pn],pn[0].ya),\
-        'ko');
+        'ko-');
 plt.plot([p.xc for p in pn ],[p.yc for p in pn],'co',linewidth=5)
 #compute SLP
 def SLP(pj,x0,y0):
@@ -160,13 +167,13 @@ def VelocityField(p,X,Y):
             v[i,j]=uy
     return u,v
 #definition of meshgrid
-Nx,Ny=64,64
+Nx,Ny=32,32
 X,Y=np.meshgrid(np.linspace(0.01*Lx,0.99*Lx,Nx),np.linspace(0.01*Ly,0.99*Ly,Ny))
 u,v=VelocityField(pn,X,Y)
 size=12
 plt.figure(figsize=(size,(yEnd-yStart)/(xEnd-xStart)*size))
-plt.streamplot(X,Y,u,v,density=10,linewidth=1,arrowsize=1,arrowstyle='->')
-#plt.quiver(X,Y,u,v)
+#plt.streamplot(X,Y,u,v,density=10,linewidth=1,arrowsize=1,arrowstyle='->')
+plt.quiver(X,Y,u,v)
 plt.plot(np.append([p.xa for p in pn],pn[0].xa),\
         np.append([p.ya for p in pn],pn[0].ya),\
         linestyle='-',linewidth=1,\
