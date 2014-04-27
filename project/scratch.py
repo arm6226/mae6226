@@ -3,13 +3,12 @@ from scipy import integrate
 from math import *
 import matplotlib.pyplot as plt
 plt.close('all')
-Ni  =  4;       # Number of elements per side
+Ni  =  8;       # Number of elements per side
 N   =  4*Ni;    # Total number of elements
 Lx,Ly  =  [1.0,1.0];   # square box size
 hx,hy =  [Lx/Ni,Ly/Ni];  # element length
 mu  =  1.0;  # Fluid viscosity
 U   =  2.0;  # Lid velocity
-
 pn = np.empty(N,dtype=object)
 minf=np.zeros((N,N,3,3))
 dlpsum=np.zeros((3,1))
@@ -17,7 +16,6 @@ dd=np.zeros((2*N,1))
 A=np.zeros((2*N,2*N))
 c1=np.zeros((2*Ni,1))
 c2=np.zeros((6*Ni,1))
-
 class Panel:
     def __init__(self,xa,ya,xb,yb):
         self.xa,self.ya = xa,ya                     # 1st end-point
@@ -29,7 +27,6 @@ class Panel:
             self.beta=acos((ya-yb)/self.length)
         elif (xb-xa<0.):
             self.beta = pi+acos((ya-yb)/self.length)
-
         #cartesian components of traction vector
         self.fx=0.
         self.fy=0.
@@ -46,7 +43,6 @@ for i in range(N):
     elif (3*Ni<=i<4*Ni):
         ii=i-3*Ni
         pn[i]=Panel(0.,(ii*hy),0.,((ii+1)*hy))
-    print(pn[i].beta)
 #display the geometry
 valX,valY = 0.1*Lx,0.1*Ly
 xmin,xmax = min([p.xa for p in pn]),max([p.xa for p in pn])
@@ -164,12 +160,12 @@ def VelocityField(p,X,Y):
             v[i,j]=uy
     return u,v
 #definition of meshgrid
-Nx,Ny=16,16
+Nx,Ny=64,64
 X,Y=np.meshgrid(np.linspace(0.01*Lx,0.99*Lx,Nx),np.linspace(0.01*Ly,0.99*Ly,Ny))
 u,v=VelocityField(pn,X,Y)
 size=12
 plt.figure(figsize=(size,(yEnd-yStart)/(xEnd-xStart)*size))
-plt.streamplot(X,Y,u,v,density=5,linewidth=1,arrowsize=1,arrowstyle='->')
+plt.streamplot(X,Y,u,v,density=10,linewidth=1,arrowsize=1,arrowstyle='->')
 #plt.quiver(X,Y,u,v)
 plt.plot(np.append([p.xa for p in pn],pn[0].xa),\
         np.append([p.ya for p in pn],pn[0].ya),\
